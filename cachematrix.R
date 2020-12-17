@@ -1,8 +1,7 @@
 ##
 ## Since computing the inverse of a matrix might be a costly computation the R code
-## in the file defines functions that created a wrapped instance of a matrix that 
-## compute and cache the inverse of that matrix when the inverse is executed the
-## first time.
+## in the file defines functions that create and use a wrapped instance of a matrix to 
+## cache the inverse of that matrix when the inverse is executed the first time.
 ##
 
 #' This function creates a wrapper around a numeric matrix instance that caches 
@@ -19,7 +18,7 @@ makeCacheMatrix <- function(x = matrix()) {
     #' @param y the new internal matrix
     set <- function(y) {
         x <<- y
-        cached_inv <<- NULL # reset a possible cached result
+        cached_inv <<- NULL # reset a possibly cached result
     }
     
     #' @return the internal matrix 'x'
@@ -29,7 +28,8 @@ makeCacheMatrix <- function(x = matrix()) {
     #' @param inv the inverse of the internal matrix 'x'
     setInverse <- function(inv) { cached_inv <<- inv }
     
-    #' @return the cached inverse of the internal matrix 'x'
+    #' @return the cached inverse of the internal matrix 'x' 
+    #'         or NULL if no result is cached
     getInverse <- function() { cached_inv }
     
     # return the list with the 4 functions
@@ -38,7 +38,7 @@ makeCacheMatrix <- function(x = matrix()) {
 
 
 #' This function retrieves the inverse of the wrapped matrix passed as argument 'x'.
-#' It first checks whether the inverse has already been computed and cached and
+#' It first checks whether the inverse has already been computed / cached and
 #' if this is the case the cached result is returned. 
 #' If not the inverse is computed, cached and returned.
 #' 
@@ -47,18 +47,19 @@ makeCacheMatrix <- function(x = matrix()) {
 #' 
 cacheSolve <- function(x, ...) {
     ## Return a matrix that is the inverse of 'x'
+  
     # check whether the inverse has already been computed and cached 
     inv <- x$getInverse()
     if (is.null(inv)) { # no cached result yet
-        # get the raw matrix,
+        # get the internal matrix,
         data <- x$get()
         # compute its inverse,
         inv <- solve(data, ...)
-        # and cache the inverse matrix
+        # and cache it
         x$setInverse(inv)
       
     } else {
-        message("mgetting cached data") # nothing to do
+        message("getting cached inverse") # nothing to do
     }
     # finally return the result
     inv
